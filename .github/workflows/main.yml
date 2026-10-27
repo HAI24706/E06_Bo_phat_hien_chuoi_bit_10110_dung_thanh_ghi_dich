@@ -27,7 +27,8 @@ jobs:
 
       - name: Setup PDK Sky130A
         run: |
-          volare install --pdk sky130A --latest
+          # Sửa lại cú pháp volare tương thích phiên bản mới
+          volare get --pdk sky130A || python3 -m volare get --pdk sky130A
 
       - name: Run LibreLane Flow
         run: |
