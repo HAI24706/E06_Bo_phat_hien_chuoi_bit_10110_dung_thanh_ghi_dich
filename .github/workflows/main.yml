@@ -18,27 +18,19 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install OpenLane & Volare
+      - name: Install OpenLane & Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk verilator
           python -m pip install --upgrade pip
-          pip install openlane volare yowasp-yosys
+          pip install openlane yowasp-yosys
 
-      - name: Setup Sky130 PDK via Volare
+      - name: Run OpenLane Flow (Auto-managed PDK)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          export PDK_ROOT="/opt/sky130A"
-          mkdir -p $PDK_ROOT
-          # Dùng đúng cú pháp --pdk-root của volare
-          volare enable --pdk-root $PDK_ROOT sky130A || volare enable --pdk-root $PDK_ROOT
-
-      - name: Run OpenLane Flow
-        env:
-          PDK_ROOT: "/opt/sky130A"
-        run: |
-          python3 -m openlane --pdk sky130A --pdk_root /opt/sky130A 04_IMPLEMENTATION/config.json
+          # OpenLane sẽ tự động tải phiên bản PDK sky130 tương thích thông qua volare nội bộ mà không bị lỗi đường dẫn metadata
+          python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
