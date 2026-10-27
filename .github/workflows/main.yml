@@ -18,27 +18,26 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install OpenLane & Volare (PDK Manager)
+      - name: Install OpenLane & Volare
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk verilator
           python -m pip install --upgrade pip
           pip install openlane volare yowasp-yosys
 
-      - name: Pull and Install Sky130 PDK via Volare
+      - name: Setup Sky130 PDK via Volare
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Tự động tải và đồng bộ đúng phiên bản PDK Sky130 tương thích vào thư mục chuẩn
           export PDK_ROOT="/opt/sky130A"
           mkdir -p $PDK_ROOT
-          volare enable --pdk sky130A --root $PDK_ROOT || volare pull --pdk sky130A --root $PDK_ROOT
+          # Dùng đúng cú pháp --pdk-root của volare
+          volare enable --pdk-root $PDK_ROOT sky130A || volare enable --pdk-root $PDK_ROOT
 
       - name: Run OpenLane Flow
         env:
           PDK_ROOT: "/opt/sky130A"
         run: |
-          # Chạy trực tiếp openlane với PDK đã được cài sẵn, bỏ qua mọi lỗi thiết lập container rườm rà
           python3 -m openlane --pdk sky130A --pdk_root /opt/sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
