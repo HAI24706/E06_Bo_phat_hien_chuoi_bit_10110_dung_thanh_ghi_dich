@@ -6,5 +6,6 @@
     "FP_SIZING": "absolute",
     "DIE_AREA": "0 0 100 100",
     "RUN_LINT": false,
-    "QUIT_ON_LINT_ERRORS": false
+    "QUIT_ON_LINT_ERRORS": false,
+    "SYNTH_STRATEGY": "AREA 0"
 }
