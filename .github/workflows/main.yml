@@ -13,30 +13,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Run OpenLane v2 in Official Docker Container
+        uses: efabless/openlane-action@main
         with:
-          python-version: '3.10'
-
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk verilator yosys
-          python -m pip install --upgrade pip
-          pip install openlane yowasp-yosys
-
-      - name: Setup Yosys Symbolic Link
-        run: |
-          # Đảm bảo lệnh yosys trỏ chính xác tuyệt đối tới yowasp-yosys cho toàn bộ tiến trình hệ thống
-          sudo ln -sf $(which yowasp-yosys || which yosys) /usr/local/bin/yosys
-          sudo chmod +x /usr/local/bin/yosys
-
-      - name: Run OpenLane Flow
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PDK_ROOT: "/opt/sky130A"
-        run: |
-          python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
+          pdk: sky130A
+          config: 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
