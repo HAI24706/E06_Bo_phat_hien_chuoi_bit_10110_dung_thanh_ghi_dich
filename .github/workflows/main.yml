@@ -21,13 +21,12 @@ jobs:
       - name: Install OpenLane & Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk
+          sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk verilator
           python -m pip install --upgrade pip
           pip install openlane
 
       - name: Run OpenLane Flow v2
         run: |
-          # Trỏ trực tiếp đến tệp config.json trong thư mục 04_IMPLEMENTATION
           python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
