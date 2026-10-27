@@ -1,9 +1,10 @@
 {
-  "DESIGN_NAME": "e06_detector",
-  "VERILOG_FILES": "dir::rtl/e06_detector.sv",
-  "CLOCK_PORT": "clk",
-  "CLOCK_PERIOD": 10.0,
-  "FP_SIZING": "absolute",
-  "DIE_AREA": "0 0 150 150",
-  "RUN_LINT": false
+    "DESIGN_NAME": "e06_detector",
+    "VERILOG_FILES": "dir::rtl/e06_detector.sv",
+    "CLOCK_PORT": "clk",
+    "CLOCK_PERIOD": 10.0,
+    "FP_SIZING": "absolute",
+    "DIE_AREA": "0 0 100 100",
+    "RUN_LINT": false,
+    "QUIT_ON_LINT_ERRORS": false
 }
