@@ -18,21 +18,19 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
+      - name: Install System Dependencies & Yosys
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk verilator
+          sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk verilator yosys
           python -m pip install --upgrade pip
-          pip install openlane yowasp-yosys
+          pip install openlane
 
       - name: Convert SystemVerilog to Verilog for compatibility
         run: |
-          # Đổi tên hoặc tạo bản .v chuẩn Verilog-2005 để Yosys xử lý không bị lỗi cú pháp
           cp 04_IMPLEMENTATION/rtl/e06_detector.sv 04_IMPLEMENTATION/rtl/e06_detector.v
 
       - name: Run OpenLane Flow v2
         run: |
-          # Cập nhật config trỏ tới file .v và chạy ép kiểu verbose để hiển thị log rõ ràng
           sed -i 's/e06_detector.sv/e06_detector.v/g' 04_IMPLEMENTATION/config.json
           python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
 
