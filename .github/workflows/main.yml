@@ -13,11 +13,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Run OpenLane v2 in Official Docker Container
-        uses: efabless/openlane-action@main
-        with:
-          pdk: sky130A
-          config: 04_IMPLEMENTATION/config.json
+      - name: Run OpenLane v2 via Official Docker Image
+        run: |
+          # Kéo và chạy trực tiếp container chính thức của OpenLane v2, mount thư mục thiết kế vào trong container
+          docker pull ghcr.io/efabless/openlane2:latest
+          docker run --rm \
+            -v $(pwd):/workspace \
+            -w /workspace \
+            ghcr.io/efabless/openlane2:latest \
+            python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
