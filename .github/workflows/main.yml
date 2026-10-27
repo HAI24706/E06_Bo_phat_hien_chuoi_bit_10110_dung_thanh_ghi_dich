@@ -25,11 +25,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install openlane yowasp-yosys
 
-      - name: Run OpenLane Flow (Auto-managed PDK)
+      - name: Create Yosys Wrapper / Symlink
+        run: |
+          # Tạo liên kết hoặc wrapper chuẩn để lệnh 'yosys' trỏ thẳng đến 'yowasp-yosys'
+          sudo ln -sf $(which yowasp-yosys) /usr/local/bin/yosys
+          sudo chmod +x /usr/local/bin/yosys
+          yosys --version
+
+      - name: Run OpenLane Flow
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # OpenLane sẽ tự động tải phiên bản PDK sky130 tương thích thông qua volare nội bộ mà không bị lỗi đường dẫn metadata
+          # Chạy OpenLane, tự động quản lý và tải PDK mượt mà
           python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
