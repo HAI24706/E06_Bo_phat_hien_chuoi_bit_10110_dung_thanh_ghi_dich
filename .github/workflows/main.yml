@@ -25,21 +25,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install openlane
 
-      - name: Run OpenLane Flow
+      - name: Run OpenLane Flow v2
         run: |
-          # Tìm và gọi chính xác đường dẫn tệp flow.tcl đã cài đặt
-          python3 -m pip show openlane
-          python3 -c "import openlane; import pathlib; print(pathlib.Path(openlane.__file__).parent)"
-          
-          # Cấu hình PATH bao gồm thư mục chứa script của python user/system
-          export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
-          
-          # Thử chạy flow.tcl trực tiếp hoặc thông qua python module
-          if command -v flow.tcl &> /dev/null; then
-              flow.tcl -design . -pdk sky130A
-          else
-              python3 -m openlane.cli -design . -pdk sky130A || python3 $(python3 -c "import site; print(site.getsitepackages()[0])")/openlane/flow.tcl -design . -pdk sky130A
-          fi
+          # Sử dụng lệnh CLI chuẩn của OpenLane v2
+          python3 -m openlane --design . --pdk sky130A
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
