@@ -7,13 +7,23 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build-gds:
+  build:
     runs-on: ubuntu-latest
-    container:
-      image: efabless/openlane:2023.12.11_git96bca48
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install OpenLane / LibreLane
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk
+          python -m pip install --upgrade pip
+          pip install openlane
 
       - name: Run OpenLane Flow
         run: |
