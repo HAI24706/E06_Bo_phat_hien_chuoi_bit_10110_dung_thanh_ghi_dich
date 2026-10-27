@@ -27,17 +27,16 @@ jobs:
 
       - name: Fix Yosys Executable Symlink for OpenLane v2
         run: |
-          # Tìm đường dẫn yowasp-yosys và tạo symlink thành yosys để OpenLane v2 nhận diện trực tiếp
           YOSYS_PATH=$(which yowasp-yosys || find ~/.local/bin /usr/local/bin /usr/bin -name "yowasp-yosys" 2>/dev/null | head -n 1)
           if [ -z "$YOSYS_PATH" ]; then
             YOSYS_PATH=$(python3 -c "import shutil; print(shutil.which('yowasp-yosys') or '')")
           fi
-          echo "Found yowasp-yosys at: $YOSYS_PATH"
           sudo ln -sf "$YOSYS_PATH" /usr/local/bin/yosys
           sudo chmod +x /usr/local/bin/yosys
-          yosys --version || echo "Yosys symlink created successfully."
 
       - name: Run OpenLane Flow v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
 
