@@ -1,6 +1,6 @@
 {
   "DESIGN_NAME": "e06_detector",
-  "VERILOG_FILES": "dir::../../02_RTL/e06_detector.v",
+  "VERILOG_FILES": "dir::rtl/e06_detector.sv",
   "CLOCK_PORT": "clk",
   "CLOCK_PERIOD": 10.0,
   "FP_SIZING": "absolute",
