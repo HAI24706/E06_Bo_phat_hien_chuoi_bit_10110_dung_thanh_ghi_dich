@@ -13,15 +13,33 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Run OpenLane via Official OpenROAD Docker Image
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install OpenLane & Volare (PDK Manager)
         run: |
-          docker pull ghcr.io/the-openroad-project/openlane:latest
-          docker run --rm \
-            -v $(pwd):/workspace \
-            -w /workspace \
-            -e PDK=sky130A \
-            ghcr.io/the-openroad-project/openlane:latest \
-            flow.tcl -design 04_IMPLEMENTATION -pdk sky130A -tag run -overwrite
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk verilator
+          python -m pip install --upgrade pip
+          pip install openlane volare yowasp-yosys
+
+      - name: Pull and Install Sky130 PDK via Volare
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Tự động tải và đồng bộ đúng phiên bản PDK Sky130 tương thích vào thư mục chuẩn
+          export PDK_ROOT="/opt/sky130A"
+          mkdir -p $PDK_ROOT
+          volare enable --pdk sky130A --root $PDK_ROOT || volare pull --pdk sky130A --root $PDK_ROOT
+
+      - name: Run OpenLane Flow
+        env:
+          PDK_ROOT: "/opt/sky130A"
+        run: |
+          # Chạy trực tiếp openlane với PDK đã được cài sẵn, bỏ qua mọi lỗi thiết lập container rườm rà
+          python3 -m openlane --pdk sky130A --pdk_root /opt/sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
