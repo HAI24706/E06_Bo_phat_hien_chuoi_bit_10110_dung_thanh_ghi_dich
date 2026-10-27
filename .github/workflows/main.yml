@@ -19,6 +19,7 @@ jobs:
           docker run --rm \
             -v $(pwd):/workspace \
             -w /workspace \
+            -e PDK=sky130A \
             ghcr.io/the-openroad-project/openlane:latest \
             flow.tcl -design 04_IMPLEMENTATION -pdk sky130A -tag run -overwrite
 
