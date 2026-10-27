@@ -25,12 +25,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install openlane yowasp-yosys
 
-      - name: Run OpenLane Flow (Direct Python Mode)
+      - name: Run OpenLane Flow
         env:
           PDK_ROOT: "/opt/sky130A"
         run: |
-          # Chạy trực tiếp qua module python của openlane không dùng cờ docker để tránh lỗi TTY terminal
-          python3 -m openlane.cli --pdk sky130A 04_IMPLEMENTATION/config.json
+          # Gọi đúng chuẩn module chính của openlane v2
+          python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
