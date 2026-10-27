@@ -7,32 +7,17 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build:
+  build-gds:
     runs-on: ubuntu-latest
+    container:
+      image: efabless/openlane:2023.12.11_git96bca48
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install Dependencies & LibreLane
+      - name: Run OpenLane Flow
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential python3-dev git libffi-dev
-          python -m pip install --upgrade pip
-          pip install librelane volare
-
-      - name: Setup PDK Sky130A
-        run: |
-          # Sửa lại cú pháp volare tương thích phiên bản mới
-          volare get --pdk sky130A || python3 -m volare get --pdk sky130A
-
-      - name: Run LibreLane Flow
-        run: |
-          librelane --pdk sky130A config.json
+          flow.tcl -design . -pdk sky130A
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
