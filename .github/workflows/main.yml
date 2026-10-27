@@ -9,28 +9,15 @@ on:
 jobs:
   build-gds:
     runs-on: ubuntu-latest
+    container:
+      image: efabless/openlane:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install System Dependencies
+      - name: Run OpenLane Flow (Sky130A)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential python3-dev libffi-dev git
-
-      - name: Install LibreLane and Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install librelane
-
-      - name: Run LibreLane Flow (Sky130A)
-        run: |
-          librelane --pdk sky130A config.json
+          flow.tcl -design . -pdk sky130A
 
       - name: Upload GDSII Artifacts
         uses: actions/upload-artifact@v4
