@@ -1,4 +1,4 @@
-name: RTL-to-GDSII E06
+name: RTL-to-GDSII LibreLane (E06)
 
 on:
   push:
@@ -7,17 +7,32 @@ on:
     branches: [ main, master ]
 
 jobs:
-  run-openlane:
+  librelane-build:
     runs-on: ubuntu-latest
-    container:
-      image: efabless/openlane:2023.12.11_git96bca48
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Run OpenLane Flow
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install System Packages
         run: |
-          flow.tcl -design . -pdk sky130A
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3-dev git libffi-dev
+
+      - name: Install LibreLane and PDK
+        run: |
+          python -m pip install --upgrade pip
+          pip install librelane
+          volare --version || pip install volare
+          volare install --pdk sky130A --latest
+
+      - name: Execute LibreLane Flow
+        run: |
+          librelane --pdk sky130A config.json
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
