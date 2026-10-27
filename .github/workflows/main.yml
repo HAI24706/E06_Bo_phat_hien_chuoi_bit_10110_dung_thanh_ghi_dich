@@ -1,0 +1,40 @@
+name: RTL-to-GDSII E06 Automation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies & LibreLane
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3-dev git libffi-dev
+          python -m pip install --upgrade pip
+          pip install librelane volare
+
+      - name: Setup PDK Sky130A
+        run: |
+          volare install --pdk sky130A --latest
+
+      - name: Run LibreLane Flow
+        run: |
+          librelane --pdk sky130A config.json
+
+      - name: Upload GDSII Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdsii-output
+          path: runs/*/results/
