@@ -13,13 +13,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Run OpenLane v2 Official Docker (No TTY)
+      - name: Run OpenLane v2 Official Docker (Stable Version)
         run: |
-          # Chạy trực tiếp container chính thức của OpenLane v2 không dùng cờ -t để tránh lỗi terminal trên GitHub Actions
+          # Dùng đúng tag phiên bản 2.3.10 chính thức của OpenLane v2 để không bị lỗi not found
           docker run --rm \
             -v $(pwd):/workspace \
             -w /workspace \
-            ghcr.io/efabless/openlane2:latest \
+            ghcr.io/efabless/openlane2:2.3.10 \
             python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
