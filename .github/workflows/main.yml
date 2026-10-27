@@ -27,7 +27,7 @@ jobs:
 
       - name: Run OpenLane Flow v2
         run: |
-          # Chạy OpenLane với tệp config.json đã đặt tại thư mục 04_IMPLEMENTATION
+          # Chạy OpenLane với tệp config.json trong thư mục 04_IMPLEMENTATION
           python3 -m openlane --pdk sky130A 04_IMPLEMENTATION/config.json || true
 
       - name: Upload GDSII Artifact
@@ -35,5 +35,6 @@ jobs:
         with:
           name: gdsii-output
           path: |
-            04_IMPLEMENTATION/runs/**/results/
-            04_IMPLEMENTATION/runs/**/final/
+            04_IMPLEMENTATION/runs/
+            **/runs/
+            runs/
