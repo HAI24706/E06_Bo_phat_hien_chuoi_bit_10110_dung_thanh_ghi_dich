@@ -1,0 +1,3 @@
+04_IMPLEMENTATION/rtl/e06_detector_explicit.sv:12: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+04_IMPLEMENTATION/rtl/e06_detector.sv:13: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+05_VERIFICATION/golden_model/e06_reference.sv:12: sorry: constant selects in always_* processes are not currently supported (all bits will be included).

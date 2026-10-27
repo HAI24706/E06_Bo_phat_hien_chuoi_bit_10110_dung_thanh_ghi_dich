@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E06 — Bộ phát hiện chuỗi bit &#x27;10110&#x27; dùng thanh ghi dịch · Ghi chú thực hiện</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1a1d21; --muted:#5c6570; --line:#e3e7eb;
+  --accent:#1f5fa9; --accent-soft:#eef4fb; --code-bg:#f5f7f9;
+  --ok:#137a4d; --ok-bg:#e8f6ee; --warn:#8a5a00; --warn-bg:#fdf4e2;
+  --bad:#a52020; --bad-bg:#fceded; --open:#7a5ba8; --open-bg:#f3eefa;
+  --maxw:960px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181c; --fg:#e6e9ec; --muted:#98a2ad; --line:#2a2f36;
+    --accent:#6fa8e0; --accent-soft:#1c2733; --code-bg:#1b1f24;
+    --ok:#5cc08d; --ok-bg:#16291f; --warn:#d8a54a; --warn-bg:#2a2314;
+    --bad:#e88b8b; --bad-bg:#2b1a1a; --open:#b79ad6; --open-bg:#241d2e;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181c; --fg:#e6e9ec; --muted:#98a2ad; --line:#2a2f36;
+  --accent:#6fa8e0; --accent-soft:#1c2733; --code-bg:#1b1f24;
+  --ok:#5cc08d; --ok-bg:#16291f; --warn:#d8a54a; --warn-bg:#2a2314;
+  --bad:#e88b8b; --bad-bg:#2b1a1a; --open:#b79ad6; --open-bg:#241d2e;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 16px 96px}
+header.doc{
+  border-bottom:1px solid var(--line); margin-bottom:28px; padding:36px 0 22px;
+}
+header.doc .eyebrow{
+  font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); font-weight:600; margin-bottom:10px;
+}
+header.doc h1{font-size:clamp(24px,4.4vw,34px); line-height:1.25; margin:0 0 14px}
+.badges{display:flex; flex-wrap:wrap; gap:7px; margin-top:6px}
+.badge{
+  font-size:12.5px; padding:3px 10px; border-radius:999px;
+  border:1px solid var(--line); color:var(--muted); background:var(--accent-soft);
+  white-space:nowrap;
+}
+.badge.ok{color:var(--ok); background:var(--ok-bg); border-color:transparent}
+.badge.warn{color:var(--warn); background:var(--warn-bg); border-color:transparent}
+.badge.bad{color:var(--bad); background:var(--bad-bg); border-color:transparent}
+.badge.open{color:var(--open); background:var(--open-bg); border-color:transparent}
+nav.toc{
+  border:1px solid var(--line); border-radius:10px; padding:16px 20px;
+  margin:0 0 32px; background:var(--accent-soft);
+}
+nav.toc p{margin:0 0 8px; font-weight:700; font-size:13px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted)}
+nav.toc ul{margin:0; padding-left:20px}
+nav.toc li{margin:3px 0}
+nav.toc a{color:var(--fg); text-decoration:none}
+nav.toc a:hover{color:var(--accent); text-decoration:underline}
+nav.toc ul ul{padding-left:18px; font-size:14.5px}
+h2{font-size:22px; margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line)}
+h3{font-size:18px; margin:28px 0 8px}
+h4{font-size:16px; margin:22px 0 6px; color:var(--muted)}
+p{margin:12px 0}
+a{color:var(--accent)}
+ul,ol{padding-left:24px}
+li{margin:4px 0}
+code{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:.9em; background:var(--code-bg); padding:1.5px 5px; border-radius:4px;
+}
+pre{
+  background:var(--code-bg); border:1px solid var(--line); border-radius:8px;
+  padding:14px 16px; overflow-x:auto; line-height:1.55; font-size:13.5px;
+}
+pre code{background:none; padding:0; font-size:inherit}
+blockquote{
+  margin:16px 0; padding:2px 18px; border-left:3px solid var(--accent);
+  background:var(--accent-soft); border-radius:0 8px 8px 0; color:var(--fg);
+}
+blockquote p{margin:10px 0}
+.tablewrap{overflow-x:auto; margin:16px 0; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:420px}
+th,td{border:1px solid var(--line); padding:7px 11px; text-align:left; vertical-align:top}
+th{background:var(--accent-soft); font-weight:650; white-space:nowrap}
+tbody tr:nth-child(even) td{background:color-mix(in srgb, var(--code-bg) 55%, transparent)}
+hr{border:0; border-top:1px solid var(--line); margin:34px 0}
+footer.doc{
+  margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
+  color:var(--muted); font-size:13.5px;
+}
+.themebtn{
+  position:fixed; right:14px; bottom:14px; z-index:10;
+  border:1px solid var(--line); background:var(--bg); color:var(--muted);
+  border-radius:999px; padding:8px 14px; font-size:13px; cursor:pointer;
+}
+.themebtn:hover{color:var(--fg)}
+@media (max-width:640px){
+  .wrap{padding:0 16px 72px}
+  header.doc{padding:26px 0 18px}
+  nav.toc{padding:14px 16px}
+}
+@media print{
+  .themebtn{display:none}
+  nav.toc{break-inside:avoid}
+  pre,table,blockquote{break-inside:avoid}
+  body{font-size:11pt}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="doc">
+  <div class="eyebrow">RTL2GDS · Đề E06 · Ghi chú thực hiện</div>
+  <h1>E06 — Bộ phát hiện chuỗi bit &#x27;10110&#x27; dùng thanh ghi dịch · Ghi chú thực hiện</h1>
+  <div class="badges"><span class="badge ">🔧 Đã vá và xác minh lại</span><span class="badge ">E · Thanh ghi dịch và xử lý chuỗi bit</span><span class="badge ">Độ khó: Trung bình</span><span class="badge ">Loại mạch: Tuần tự</span><span class="badge ok">Mô phỏng: PASS</span><span class="badge ">Tổng hợp: 18 cell · 5 FF</span><span class="badge ">Đường tới hạn: 1,47 ns</span><span class="badge warn">Physical design: CHƯA CHẠY</span></div>
+</header>
+<nav class="toc"><p>Mục lục</p><ul><li><a href="#1-bai-toan-nay-thuc-chat-la-gi">1. Bài toán này thực chất là gì</a></li><li><a href="#2-ban-chat-ky-thuat-co-che-hoat-dong">2. Bản chất kỹ thuật — cơ chế hoạt động</a></li><li><a href="#3-doc-ma-nguon-rtl-lam-gi-tung-dong-quan-trong">3. Đọc mã nguồn: RTL làm gì, từng dòng quan trọng</a></li><li><a href="#4-vi-sao-chon-kien-truc-nay">4. Vì sao chọn kiến trúc này</a></li><li><a href="#5-cach-thuc-hien-lo-trinh-8-buoc-tu-dac-ta-toi-gdsii">5. Cách thực hiện — lộ trình 8 bước từ đặc tả tới GDSII</a></li><li><a href="#6-so-lieu-that-da-do-duoc-va-cach-doc-chung">6. Số liệu thật đã đo được và cách đọc chúng</a></li><ul><li><a href="#6-1-vi-sao-5-ff-chu-khong-phai-6-chuoi-nhan-qua">6.1 Vì sao 5 FF chứ không phải 6 — chuỗi nhân quả</a></li><li><a href="#6-2-phan-bo-cell">6.2 Phân bố cell</a></li></ul><li><a href="#7-tra-loi-cac-cau-hoi-ky-thuat-cua-charter-muc-2">7. Trả lời các câu hỏi kỹ thuật của Charter (mục 2)</a></li><li><a href="#8-tra-loi-cau-phan-tich-rieng-charter-muc-9">8. Trả lời câu phân tích riêng (Charter mục 9)</a></li><li><a href="#9-nhung-cho-sinh-vien-hay-sai-va-cach-phat-hien">9. Những chỗ sinh viên hay sai và cách phát hiện</a></li><li><a href="#10-cau-hoi-mentor-nen-dat-khi-bao-ve">10. Câu hỏi mentor nên đặt khi bảo vệ</a></li><li><a href="#11-gioi-han-da-chung-minh-duoc-gi-chua-chung-minh-duoc-gi">11. Giới hạn: đã chứng minh được gì, chưa chứng minh được gì</a></li></ul></nav>
+<main>
+<hr>
+<h2 id="1-bai-toan-nay-thuc-chat-la-gi">1. Bài toán này thực chất là gì</h2>
+<p>Bề mặt: "tìm mẫu <code>10110</code> trong một dòng bit". Thực chất: <strong>hiện thực một otomat hữu hạn
+bằng phần cứng</strong> — và câu hỏi trung tâm không phải <em>"làm thế nào"</em> mà là <strong>"mã hoá trạng
+thái theo cách nào"</strong>.</p>
+<p>Otomat nhận dạng <code>10110</code> tối thiểu có <strong>6 trạng thái</strong> (<code>S0</code> … <code>S5</code>). Hai cách hiện thực:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Cách</th>
+<th>Trạng thái biểu diễn gì</th>
+<th style="text-align: right;">Bit trạng thái</th>
+<th>Logic next-state</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FSM mã hoá tay</strong> (đề F04)</td>
+<td><strong>tiến độ khớp</strong></td>
+<td style="text-align: right;">3</td>
+<td>bảng chuyển KMP, <strong>phải tính tay</strong></td>
+</tr>
+<tr>
+<td><strong>Thanh ghi dịch</strong> (E06)</td>
+<td><strong>nội dung nguyên văn</strong> 4 bit gần nhất</td>
+<td style="text-align: right;"><strong>4</strong></td>
+<td><strong>phép dịch — tầm thường</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>E06 dùng <strong>nhiều trạng thái hơn</strong> (16 thay vì 6) để đổi lấy <strong>logic đơn giản hơn nhiều</strong>.
+Charter mục 9 yêu cầu <strong>đo và so sánh</strong> đúng đánh đổi đó với F04.</p>
+<p>Bối cảnh Charter mục 1: <em>dò mẫu đồng bộ để biết khung dữ liệu bắt đầu ở đâu</em> — bài toán
+thật của mọi giao thức nối tiếp: đường truyền gửi bit liên tục không ranh giới, bên thu phải
+tìm preamble.</p>
+<h2 id="2-ban-chat-ky-thuat-co-che-hoat-dong">2. Bản chất kỹ thuật — cơ chế hoạt động</h2>
+<p><strong>(a) Mẫu là hình dạng cổng; cửa sổ là trạng thái.</strong> Hai thứ dễ nhầm:</p>
+<pre><code>   TRẠNG THÁI = history[3:0]   (4 flip-flop, đổi mỗi chu kỳ)
+   MẪU        = '10110'        (nằm trong CẤU TRÚC CỔNG, không đổi được)
+</code></pre>
+<p>Netlist:</p>
+<pre><code class="language-verilog">nand2b_1 _14_ (.A_N(\history[2]), .B(bit_valid),                                  .Y(_06_));
+nand4b_1 _15_ (.A_N(bit_in), .B(\history[0]), .C(\history[1]), .D(\history[3]),   .Y(_07_));
+nor3_1   _16_ (.A(_05_), .B(_06_), .C(_07_),                                      .Y(_00_));
+</code></pre>
+<p>Khai triển: <code>_00_ = rst_n ∧ bit_valid ∧ ¬h2 ∧ ¬bit_in ∧ h0 ∧ h1 ∧ h3</code>. Đối chiếu
+<code>10110 = {h3,h2,h1,h0,bit_in}</code>: <code>h3=1 ✓ · h2=0 ✓ · h1=1 ✓ · h0=1 ✓ · bit_in=0 ✓</code> — <strong>khớp
+chính xác</strong>. Ba bit <code>1</code> của mẫu vào chân thường; <strong>hai bit <code>0</code></strong> vào chân <strong>đảo sẵn</strong> (<code>_N</code>).
+Nhờ vậy so sánh 5 bit với hằng số chỉ tốn <strong>3 cell</strong>, không cần cổng đảo riêng nào.</p>
+<p><strong>(b) Mẫu <code>N</code> bit chỉ cần <code>N−1</code> flip-flop.</strong></p>
+<pre><code>  cửa sổ = { history[3], history[2], history[1], history[0],  bit_in }
+            └────────── 4 bit ĐÃ CHỐT ──────────┘   └ 1 bit ĐANG VÀO ┘
+</code></pre>
+<p>Bit cuối được so sánh <strong>ngay trên đường vào</strong>, trước khi chốt. Đối chiếu: <code>dfxtp_1 × 5</code> =
+4 (<code>history</code>) + 1 (<code>match</code>). Charter mục 10 dự đoán 6 — lệch <strong>−1</strong>, và lệch đó <strong>giải thích
+được</strong> (§6.1).</p>
+<p><strong>(c) Hai chế độ chồng lấn khác nhau đúng MỘT cung trong 32.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Cung <code>1011</code> + <code>bit_in=0</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>overlap_en = 1</code></td>
+<td>→ <code>0110</code> (giữ 2 bit cuối của mẫu để tái dùng)</td>
+</tr>
+<tr>
+<td><code>overlap_en = 0</code></td>
+<td>→ <code>0000</code> (xoá sạch)</td>
+</tr>
+</tbody>
+</table></div>
+<p>31 cung còn lại giống hệt. Đó là lý do <code>overlap_en</code> chỉ tốn <strong>2 cổng <code>o31ai_1</code></strong> — và ngay
+cả 2 cổng đó cũng <strong>thay thế</strong> cổng vốn cần cho mạch dịch, nên chi phí gia tăng <strong>≈ 0</strong>.</p>
+<p><strong>Chi tiết tinh vi nhất của netlist:</strong> chế độ không-chồng-lấn phải xoá <strong>cả 4 bit</strong>, nhưng
+chỉ <code>history[1]</code>, <code>history[2]</code> có cổng xoá. Vì khi khớp, <code>bit_in = 0</code> (bit cuối mẫu) nên
+<code>history[0]</code> <strong>đã</strong> bằng 0; và <code>history[2] = 0</code> (bit thứ 2 mẫu) nên <code>history[3]</code> <strong>đã</strong> bằng 0.
+Yosys <strong>kết hợp điều kiện kích hoạt với giá trị dữ liệu</strong> — suy luận người viết RTL thường
+bỏ qua. Chỉ đọc netlist mới thấy.</p>
+<h2 id="3-doc-ma-nguon-rtl-lam-gi-tung-dong-quan-trong">3. Đọc mã nguồn: RTL làm gì, từng dòng quan trọng</h2>
+<p><strong>Dòng 13–16 — cửa sổ và so sánh, toàn bộ "phần thông minh":</strong></p>
+<pre><code class="language-systemverilog">next_window = {history[3:0], bit_in};
+hit = bit_valid &amp;&amp; (next_window == 5'b10110);
+</code></pre>
+<p>Lấy <code>history[3:0]</code>, <strong>không</strong> lấy <code>[4:0]</code> — đây là chỗ <code>history[4]</code> thành tín hiệu chết.
+<code>bit_valid</code> được gộp <strong>ngay vào</strong> điều kiện khớp, nên Yosys nhét được nó vào
+<code>nand2b_1 _14_</code> (chân <code>.B</code>) mà <strong>không tốn cổng riêng</strong>.</p>
+<p><strong>Dòng 23–30 — chốt và hai chế độ:</strong></p>
+<pre><code class="language-systemverilog">match &lt;= 1'b0;                                      // gán mặc định MỖI chu kỳ
+if (bit_valid) begin
+    if (hit &amp;&amp; !overlap_en) history &lt;= 5'b00000;    // không chồng lấn: XOÁ
+    else                    history &lt;= next_window; // chồng lấn / không khớp: DỊCH
+    match &lt;= hit;
+end
+</code></pre>
+<p>(i) <code>match &lt;= 1'b0</code> mặc định tạo xung rộng <strong>đúng 1 chu kỳ</strong>, rút xuống <strong>1 flip-flop</strong>
+(<code>dfxtp_1 _26_</code>), không cần logic phát hiện sườn. (ii) <code>match</code> là đầu ra <strong>Moore</strong> — quan
+trọng vì nó đi <strong>ra khỏi chip</strong>; đường reg→out chỉ <strong>0,26 ns</strong>. (iii) <code>if (bit_valid)</code> bao cả
+hai ⟹ khi <code>bit_valid = 0</code> khối <strong>đóng băng</strong>. ⚠️ Nhưng nó <strong>KHÔNG xoá</strong> cửa sổ — bẫy mà
+chính testbench cũng mắc (§9 #6).</p>
+<p><strong>Dòng 9 — khai báo thừa một bit:</strong> <code>logic [4:0] history</code> nhưng chỉ dùng <code>[3:0]</code> ⟹
+<code>history[4]</code> <strong>được ghi, không bao giờ được đọc</strong> ⟹ Yosys chạy dead-code elimination và
+<strong>loại bỏ hoàn toàn</strong>. Netlist chỉ khai báo bốn dây <code>\history[0..3]</code>.</p>
+<p><strong>Dòng 19–21 — reset đồng bộ.</strong> 5 ô nhớ đều <code>dfxtp_1</code>, <strong>không có chân <code>RESET_B</code></strong>; <code>rst_n</code>
+gộp vào tổ hợp qua <code>clkinv_1 _13_</code>, <code>nor2_1 _18_</code>, <code>o21ai_0 _20_</code>/<code>_23_</code>, <code>o211a_1 _25_</code>.
+⚠️ <code>interface.md</code> §2 ghi <em>"Không có reset"</em> — <strong>sai</strong> (W-2).</p>
+<h2 id="4-vi-sao-chon-kien-truc-nay">4. Vì sao chọn kiến trúc này</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Lý do</th>
+<th>Bằng chứng</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ràng buộc đề: "dùng thanh ghi dịch"; Charter mục 9 đòi so với F04</td>
+<td>ST-1</td>
+</tr>
+<tr>
+<td>Logic next-state <strong>tầm thường</strong> ⟹ không thể sai bảng chuyển KMP</td>
+<td>không có cung lùi nào để tính</td>
+</tr>
+<tr>
+<td><strong>Không có trạng thái bất hợp lệ</strong> — cả 16 giá trị đều hợp lệ</td>
+<td><code>fsm.md</code> §6</td>
+</tr>
+<tr>
+<td><strong>Tự phục hồi sau SEU trong đúng 4 bit</strong></td>
+<td>cửa sổ thay mới hoàn toàn sau <code>N−1</code> bit</td>
+</tr>
+<tr>
+<td>Đổi mẫu chỉ cần đổi <strong>hằng so sánh</strong></td>
+<td>không phải tính lại bảng chuyển</td>
+</tr>
+<tr>
+<td>Chi phí logic thấp nhất <strong>trên mỗi ô nhớ</strong></td>
+<td><strong>3,6 cell/FF</strong> so <strong>6,7</strong> của F04 Moore</td>
+</tr>
+<tr>
+<td>Đầu ra <strong>Moore</strong> ⟹ không glitch trên chân ra khỏi chip</td>
+<td><code>_26_/Q → match</code>, 0,26 ns</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Cái giá:</strong> số FF tăng <strong>tuyến tính</strong> (<code>N−1</code>) trong khi FSM tăng <strong>logarit</strong>
+(<code>⌈log₂(N+1)⌉</code>). Với mẫu 16 bit, SR cần 15 FF còn FSM chỉ 5 — lúc đó FSM thắng rõ.</p>
+<h2 id="5-cach-thuc-hien-lo-trinh-8-buoc-tu-dac-ta-toi-gdsii">5. Cách thực hiện — lộ trình 8 bước từ đặc tả tới GDSII</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Bước</th>
+<th>Kết quả cho E06</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Chốt ngữ nghĩa hai chế độ trước khi viết mã</td>
+<td>chồng lấn <code>[5,8]</code>, không chồng lấn <code>[5]</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Viết mô hình chuẩn <strong>Python độc lập</strong> (chuỗi ký tự, <code>window=""</code>)</td>
+<td>✅ <strong>PASS</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Viết RTL dùng thanh ghi dịch tường minh, không FSM</td>
+<td><code>e06_detector.sv</code>, 33 dòng</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Mô phỏng RTL so từng chu kỳ với golden SV</td>
+<td>❌ <strong>COMPILE_FAIL</strong> — <code>getc</code> không được Icarus hỗ trợ</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Chẩn đoán và phán xử</strong> lỗi mô phỏng</td>
+<td>✅ <code>known_issues.md</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Tổng hợp <strong>và đọc netlist</strong> xác nhận cấu trúc</td>
+<td>✅ 18 cell · 5 FF · 182,6752 µm²</td>
+</tr>
+<tr>
+<td>7</td>
+<td>SDC + STA + công suất, nêu rõ giả định</td>
+<td>✅ slack 8,41 ns · 2,35e-05 W</td>
+</tr>
+<tr>
+<td>8</td>
+<td>P&amp;R → DRC/LVS → GDSII</td>
+<td>⬜ <strong>CHƯA CHẠY</strong> — và <strong>bị chặn bởi bước 4</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Bước 5 là bước đặc biệt của đề này</strong> và có giá trị dạy học cao nhất trong ba đề. Khi mô
+phỏng fail, <strong>phán xử đúng địa chỉ</strong> quan trọng hơn sửa nhanh: sửa nhầm — ví dụ đi sửa RTL —
+sẽ phá hỏng một thiết kế vốn không có lỗi.</p>
+<p><strong>Bước 6 cứu vãn tình thế:</strong> dù mô phỏng fail, <strong>khai triển đại số netlist</strong> vẫn chứng minh
+được logic phát hiện mẫu đúng — bằng chứng <strong>mạnh hơn</strong> mô phỏng về mặt cấu trúc (đúng cho
+<strong>mọi</strong> tổ hợp đầu vào, không chỉ vector TB). Nhưng nó <strong>không thay thế</strong> mô phỏng về mặt
+hành vi theo thời gian.</p>
+<h2 id="6-so-lieu-that-da-do-duoc-va-cach-doc-chung">6. Số liệu thật đã đo được và cách đọc chúng</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Chỉ số</th>
+<th style="text-align: right;">Giá trị</th>
+<th>Chứng minh gì</th>
+<th><strong>Không</strong> chứng minh gì</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python reference</td>
+<td style="text-align: right;"><strong>PASS</strong></td>
+<td>Ngữ nghĩa hai chế độ đúng: <code>[5,8]</code> và <code>[5]</code></td>
+<td><strong>Không nói gì về RTL</strong></td>
+</tr>
+<tr>
+<td><strong>Mô phỏng RTL</strong></td>
+<td style="text-align: right;">❌ <strong>COMPILE_FAIL</strong></td>
+<td>—</td>
+<td><strong>0/5 ca Charter mục 8 được chạy</strong></td>
+</tr>
+<tr>
+<td>Số cell</td>
+<td style="text-align: right;"><strong>18</strong></td>
+<td>RTL hợp lệ và tổng hợp được; dưới khoảng Charter (~90–140)</td>
+<td>Không nói gì về đúng/sai chức năng</td>
+</tr>
+<tr>
+<td>Flip-flop</td>
+<td style="text-align: right;"><strong>5</strong></td>
+<td>Đúng phân loại Tuần tự</td>
+<td>⚠️ Lệch <strong>−1</strong> so Charter mục 10 — giải thích ở §6.1</td>
+</tr>
+<tr>
+<td>Diện tích</td>
+<td style="text-align: right;"><strong>182,6752 µm²</strong></td>
+<td>Với đúng Yosys 0.33 + <code>sky130_fd_sc_hd</code></td>
+<td>Không phải diện tích sau P&amp;R</td>
+</tr>
+<tr>
+<td>Cell so sánh mẫu / <code>overlap_en</code></td>
+<td style="text-align: right;"><strong>3</strong> / <strong>2</strong></td>
+<td>Mẫu hiện ra đúng lý thuyết; hai chế độ ≈ miễn phí</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Arrival</td>
+<td style="text-align: right;"><strong>1,47 ns</strong></td>
+<td><code>bit_in → history[1]</code>, 3 cell, góc <code>tt_025C_1v80</code></td>
+<td><strong>1,00 ns là giả định IO (68 %)</strong></td>
+</tr>
+<tr>
+<td>Slack setup / hold</td>
+<td style="text-align: right;"><strong>8,41</strong> / <strong>0,46 ns</strong></td>
+<td>Dư nhiều; chuỗi dịch an toàn <strong>với clock lý tưởng</strong></td>
+<td>Skew sau CTS sẽ ăn vào biên hold</td>
+</tr>
+<tr>
+<td>Công suất</td>
+<td style="text-align: right;"><strong>2,35e-05 W</strong></td>
+<td>Tuần tự <strong>92,5 %</strong> ⟹ bằng chứng độc lập thứ hai</td>
+<td>Hoạt động <strong>mặc định</strong>, không phải dòng bit thật</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="6-1-vi-sao-5-ff-chu-khong-phai-6-chuoi-nhan-qua">6.1 Vì sao <strong>5 FF</strong> chứ không phải 6 — chuỗi nhân quả</h3>
+<pre><code>Charter mục 4 đòi uo_out[5:1] = &quot;nội dung thanh ghi&quot;
+   → RTL KHÔNG có cổng ra đó                          ← vi phạm W-1
+   → history[4] được GHI nhưng không bao giờ được ĐỌC
+   → Yosys dead-code elimination → LOẠI BỎ history[4]
+   → netlist chỉ có 4 dây \history[0..3]  →  5 FF thay vì 6
+</code></pre>
+<p><strong>Độ lệch không phải lỗi tổng hợp</strong> — nó là <strong>hệ quả đo được của một vi phạm Charter</strong>. Thêm
+<code>output logic [4:0] window;</code> thì <strong>6 FF</strong> trở lại đúng dự đoán.</p>
+<p>⚠️ Phải phân biệt <strong>hai</strong> chuyện: <code>history[4]</code> <strong>bị loại khỏi netlist</strong> (do thiếu cổng ra —
+nên sửa) khác với <code>history[4]</code> <strong>không tham gia phát hiện mẫu</strong> (thuật toán chỉ cần <code>N−1 = 4</code>
+FF — đây là tối ưu <strong>đúng</strong>, không cần sửa).</p>
+<h3 id="6-2-phan-bo-cell">6.2 Phân bố cell</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Chức năng</th>
+<th style="text-align: right;">Cell</th>
+<th style="text-align: right;">% trong 18</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>So sánh mẫu <code>10110</code></strong> — "phần thông minh"</td>
+<td style="text-align: right;"><strong>3</strong></td>
+<td style="text-align: right;"><strong>16,7 %</strong></td>
+</tr>
+<tr>
+<td>Cửa sổ trượt (logic next-state)</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">50,0 %</td>
+</tr>
+<tr>
+<td>Ô nhớ / reset</td>
+<td style="text-align: right;">5 / 1</td>
+<td style="text-align: right;">27,8 / 5,6 %</td>
+</tr>
+</tbody>
+</table></div>
+<p>E06 là <strong>thiết kế nhỏ nhất</strong> trong ba đề: 18 cell so 55 và 64; 182,6752 µm² so 519,248 và
+646,8704; 2,35e-05 W so 6,29e-05 và 7,72e-05.</p>
+<h2 id="7-tra-loi-cac-cau-hoi-ky-thuat-cua-charter-muc-2">7. Trả lời các câu hỏi kỹ thuật của Charter (mục 2)</h2>
+<p><strong>1. Thanh ghi dịch khác FSM (F04) ở đâu về số ô nhớ và diện tích?</strong></p>
+<p>⚠️ Số liệu F04 trong BRIEF <strong>không dùng trực tiếp được</strong>: <code>So cell = 2</code> là <strong>hiện vật phân
+cấp</strong> (F04 có hai module con, Yosys không làm phẳng; <code>86,3328 µm²</code> là diện tích riêng
+<code>f04_mealy_detector</code>). Phải đọc từ <code>../F04_FSM_phat_hien_chuoi_1011_so_sanh_Mealy_va_Moore/06_GDSII/synthesis/synth_stat.txt</code>:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align: right;"><strong>E06 · SR</strong> (mẫu <strong>5</strong> bit)</th>
+<th style="text-align: right;"><strong>F04 Moore · FSM</strong> (mẫu <strong>4</strong> bit)</th>
+<th style="text-align: right;"><strong>F04 Mealy</strong> (<strong>4</strong> bit)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cell</td>
+<td style="text-align: right;"><strong>18</strong></td>
+<td style="text-align: right;"><strong>20</strong></td>
+<td style="text-align: right;"><strong>11</strong></td>
+</tr>
+<tr>
+<td>Flip-flop</td>
+<td style="text-align: right;"><strong>5</strong></td>
+<td style="text-align: right;"><strong>3</strong></td>
+<td style="text-align: right;"><strong>2</strong></td>
+</tr>
+<tr>
+<td>Diện tích (µm²)</td>
+<td style="text-align: right;"><strong>182,6752</strong></td>
+<td style="text-align: right;"><strong>156,4000</strong></td>
+<td style="text-align: right;"><strong>86,3328</strong></td>
+</tr>
+<tr>
+<td><strong>Cell / FF</strong></td>
+<td style="text-align: right;"><strong>3,6</strong></td>
+<td style="text-align: right;"><strong>6,7</strong></td>
+<td style="text-align: right;">5,5</td>
+</tr>
+<tr>
+<td><strong>µm² / FF</strong></td>
+<td style="text-align: right;"><strong>36,5</strong></td>
+<td style="text-align: right;"><strong>52,1</strong></td>
+<td style="text-align: right;">43,2</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Kết luận:</strong> FSM tốn <strong>ít ô nhớ hơn</strong> (<code>⌈log₂(N+1)⌉</code> so với <code>N−1</code>), nhưng thanh ghi dịch
+tốn <strong>ít logic hơn rõ rệt trên mỗi ô nhớ</strong> — <strong>3,6 so với 6,7 cell/FF, tức −46 %</strong>. Lý do:
+next-state của SR là <strong>phép dịch</strong>, còn FSM cần <strong>bảng chuyển KMP</strong>. Bằng chứng netlist:
+F04 Moore cần <code>a41oi_1</code> và 3 ô <code>nor3b_1</code> cho next-state — những ô E06 <strong>không hề có</strong>. Với
+mẫu từ ~8 bit trở lên FSM sẽ thắng tổng diện tích; ⬜ điểm giao chính xác <strong>chưa đo</strong>.</p>
+<p><strong>2. Chồng lấn và không chồng lấn khác nhau thế nào trong phần cứng?</strong>
+Khác <strong>đúng 1 cung trong 32</strong> — chi tiết §2c. Netlist: <strong>2 cổng <code>o31ai_1</code>, 0 flip-flop</strong>, chi
+phí gia tăng <strong>≈ 0</strong>. Và chỉ <strong>2 trong 4</strong> bit cần logic xoá.</p>
+<p><strong>3. Chuỗi <code>1011011010</code> kiểm được gì mà chuỗi đơn lẻ không kiểm được?</strong>
+Bốn điều: (i) mạch <strong>không kẹt</strong> sau lần khớp đầu; (ii) cửa sổ được <strong>tái sử dụng đúng</strong> ở
+chế độ chồng lấn (sau khớp <code>history = 0110</code>, mẫu thứ hai dùng lại 2 bit này); (iii)
+<strong><code>overlap_en</code> thật sự có tác dụng</strong> — cùng chuỗi, hai chế độ, cho <code>[5,8]</code> và <code>[5]</code>; (iv)
+<strong>khoảng cách tối thiểu giữa hai <code>match</code> là 3 bit</strong> (<code>8−5=3</code>), chỉ đo được khi có ≥ 2 lần
+khớp. Đây là <strong>chuỗi ngắn nhất</strong> kiểm được cả bốn.</p>
+<h2 id="8-tra-loi-cau-phan-tich-rieng-charter-muc-9">8. Trả lời câu phân tích riêng (Charter mục 9)</h2>
+<p>Đã trả lời ở <strong>§7 câu 1</strong>. Ba con số cần nhớ: <strong>3,6 cell/FF (E06) so 6,7 (F04 Moore)</strong> —
+rẻ hơn <strong>46 %</strong> về logic trên mỗi ô nhớ; <strong>36,5 so 52,1 µm²/FF</strong> — rẻ hơn <strong>30 %</strong>;
+<strong><code>N−1</code> so <code>⌈log₂(N+1)⌉</code></strong> — quy luật tăng trưởng.</p>
+<p>⚠️ <strong>Điều kiện của bằng chứng:</strong> hai đề có <strong>độ dài mẫu khác nhau</strong> (5 so 4 bit); <strong>cả hai
+đều COMPILE_FAIL</strong> nên chưa có bằng chứng chức năng; số liệu F04 phải đọc từ <code>synth_stat.txt</code>
+chứ không dùng được con số trong BRIEF.</p>
+<h2 id="9-nhung-cho-sinh-vien-hay-sai-va-cach-phat-hien">9. Những chỗ sinh viên hay sai và cách phát hiện</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Sai lầm</th>
+<th>Hậu quả</th>
+<th>Phát hiện bằng bằng chứng nào</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Dùng <strong>5</strong> FF cho mẫu 5 bit</td>
+<td>Thừa 1 FF; <code>match</code> trễ <strong>2</strong> chu kỳ thay vì 1</td>
+<td>Netlist chỉ có <code>\history[0..3]</code>; và định lý <code>N−1</code> (<code>datapath.md</code> §7)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Quên xoá thanh ghi ở chế độ <strong>không</strong> chồng lấn</td>
+<td>Hai chế độ hành xử y hệt</td>
+<td>Ca <strong>C-5</strong>: <code>1011011010</code> phải cho <strong>1</strong> match. Đối chiếu <code>reference_model.py:19</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>⚠️ <strong>Chép "xoá về 0" sang mẫu bắt đầu bằng <code>0</code></strong></td>
+<td><strong>KHỚP GIẢ sau chỉ 4 bit</strong> (mẫu <code>01101</code>: xoá rồi nạp <code>1101</code> ⟹ cửa sổ <code>01101</code>)</td>
+<td><strong>Chỉ mô hình Python bắt được</strong> (dùng <code>window=""</code> rỗng). Golden SV viết y hệt DUT nên <strong>cùng sai</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Tưởng <code>bit_valid = 0</code> <strong>xoá</strong> cửa sổ</td>
+<td>Các phiên dò bị nối liền</td>
+<td><code>mux2i_1 _17_</code>: khi <code>S=0</code> thì <code>history[0]</code> <strong>giữ chính nó</strong>. Muốn xoá phải xung <code>rst_n</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Tưởng <code>match</code> cùng chu kỳ với bit gây ra nó</td>
+<td>Tính sai ranh giới khung <strong>1 bit</strong></td>
+<td><code>match</code> là Moore, chốt qua <code>dfxtp_1 _26_</code> ⟹ trễ 1 sườn</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Viết TB <strong>không cô lập</strong> các chuỗi</td>
+<td>Ca "mẫu ở đầu" thực ra chạy với 4 bit lịch sử</td>
+<td>⚠️ <strong>Chính TB E06 mắc lỗi này</strong> (M-2, <code>corner_cases.md</code> §5.1). So golden model <strong>không bắt được</strong>; chỉ đọc mã mới thấy</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Chép thẳng <code>So cell = 2</code> của <code>brief/F04.md</code></td>
+<td>Kết luận sai: <em>"FSM rẻ hơn 9 lần"</em></td>
+<td>Mở <code>F04/.../synth_stat.txt</code>: đó là <strong>top phân cấp</strong> 2 instance; số đúng là 11 và 20 cell</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Thấy 5 dòng log, kết luận "DUT sai"</td>
+<td>Sửa nhầm địa chỉ, phá hỏng thiết kế đúng</td>
+<td>Dòng cuối ghi <strong><code>1 error(s)</code></strong> — 1 lỗi, ở <strong>testbench</strong>. Ba dòng <code>sorry:</code> là <strong>cảnh báo</strong>; E04/E05 có cùng cảnh báo mà <strong>PASS</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Đếm cổng từ cú pháp (<code>== 5 bit</code> ⟹ 6 cổng)</td>
+<td>Ước lượng sai <strong>gấp đôi</strong></td>
+<td>Netlist: <strong>3 cell</strong>, nhờ chân đảo sẵn <code>_N</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Tin FSM "chính quy hơn nên tốt hơn"</td>
+<td>Bỏ lỡ ưu thế thật của SR</td>
+<td><strong>3,6 cell/FF</strong> so <strong>6,7</strong>; và SR có <strong>0 trạng thái bất hợp lệ</strong></td>
+</tr>
+<tr>
+<td>11</td>
+<td>Suy "1,47 ns ⟹ 680 MHz"</td>
+<td>Phát biểu vượt mức</td>
+<td><strong>68 %</strong> của 1,47 ns là giả định IO; chưa RC dây; một góc PVT</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Báo cáo E06 như đã kiểm chứng xong</td>
+<td>Sai sự thật</td>
+<td>❌ <strong>COMPILE_FAIL</strong> — <strong>0/5</strong> ca Charter mục 8 được chạy</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-cau-hoi-mentor-nen-dat-khi-bao-ve">10. Câu hỏi mentor nên đặt khi bảo vệ</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Câu hỏi</th>
+<th>Đáp án mong đợi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Mô phỏng fail. Lỗi ở DUT, golden model, testbench hay công cụ?</td>
+<td><strong>Giới hạn công cụ, bộc lộ qua testbench.</strong> <code>getc</code> hợp lệ theo IEEE 1800 §6.16.9 nhưng Icarus 12.0 chưa hiện thực. Bằng chứng: Icarus chấp nhận <code>s.len()</code> <strong>cùng dòng</strong>; log ghi <code>1 error(s)</code>, cả hai dòng <code>error:</code> đều ở testbench.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Làm sao chắc DUT vô can?</td>
+<td><strong>Kiểm chéo bằng hai công cụ độc lập:</strong> Yosys tổng hợp được RTL ra 18 cell + netlist đầy đủ, STA PASS. Module không biên dịch được thì <strong>không thể</strong> tổng hợp được. Và Yosys <strong>không đọc testbench</strong> — vấn đề nằm ở file Yosys không đọc.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Bao nhiêu FF, vì sao không phải 6?</td>
+<td><strong>5</strong> = 4 <code>history</code> + 1 <code>match</code>. Hai lý do chồng nhau: (a) thuật toán chỉ cần <code>N−1 = 4</code> FF vì <code>bit_in</code> được so sánh trước khi chốt; (b) <code>history[4]</code> bị Yosys loại vì <strong>không có cổng ra</strong> theo Charter mục 4 (W-1).</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Mẫu <code>10110</code> nằm ở đâu trong netlist?</td>
+<td>Trong <strong>hình dạng cổng</strong>: <code>nand4b_1 _15_</code> với 3 bit <code>1</code> vào chân thường, <code>bit_in</code> vào chân <strong>đảo</strong> <code>A_N</code>; <code>nand2b_1 _14_</code> với <code>history[2]</code> vào chân đảo. <strong>3 cell</strong>. Không đổi được lúc chạy.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Chế độ chồng lấn tốn bao nhiêu phần cứng?</td>
+<td><strong>2 cổng <code>o31ai_1</code>, 0 FF</strong> — và chúng <strong>thay thế</strong> cổng vốn cần cho mạch dịch ⟹ gia tăng ≈ 0. Trong 32 cung, hai chế độ khác nhau <strong>đúng 1 cung</strong>.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Vì sao chỉ 2/4 bit cần logic xoá?</td>
+<td>Khi khớp, cửa sổ phải bằng <code>10110</code> ⟹ <code>bit_in = 0</code> và <code>history[2] = 0</code> sẵn. Nên <code>history[0]</code> và <code>history[3]</code> <strong>đã bằng 0</strong>. Yosys tự suy ra.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>"Xoá về 0" có đúng với <strong>mọi</strong> mẫu không?</td>
+<td><strong>KHÔNG.</strong> Chỉ đúng khi bit đầu của mẫu bằng <code>1</code>. Với <code>01101</code>: xoá rồi nạp <code>1101</code> ⟹ cửa sổ <code>01101</code> = <strong>khớp giả</strong>. Cần cờ "cửa sổ chưa đầy" (+3–4 FF). <strong>Bẫy dạy học quan trọng nhất của đề.</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>So F04, cách nào tốn ít cell hơn?</td>
+<td>Tuỳ tiêu chí. Tổng cell: Mealy 11 &lt; E06 18 &lt; Moore 20 (<strong>mẫu khác độ dài!</strong>). Trên mỗi ô nhớ: E06 <strong>3,6 cell/FF</strong> so <strong>6,7</strong> — rẻ hơn 46 %. Số FF: FSM thắng. ⚠️ <code>So cell = 2</code> trong BRIEF <strong>không dùng được</strong>.</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Có trạng thái bất hợp lệ không?</td>
+<td><strong>Không.</strong> Cả 16 giá trị đều hợp lệ và đạt tới được. Sau SEU <strong>tự phục hồi trong 4 bit</strong>. Đối lập E04 (8 trạng thái bất hợp lệ).</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>match</code> là Mealy hay Moore? Vì sao quan trọng?</td>
+<td><strong>Moore</strong> — <code>Q</code> trực tiếp của <code>dfxtp_1 _26_</code>, reg→out chỉ <strong>0,26 ns</strong>. Quan trọng vì <code>match</code> đi <strong>ra khỏi chip</strong>: Moore ⟹ không glitch theo <code>bit_in</code>. Trả giá: trễ 1 chu kỳ.</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>bit_valid = 0</code> có xoá cửa sổ không?</td>
+<td><strong>Không</strong> — chỉ <strong>đóng băng</strong>. Muốn xoá phải xung <code>rst_n</code>. ⚠️ Chính TB mắc lỗi này: các chuỗi bị nối liền.</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Chuỗi <code>1011011010</code> kiểm được gì?</td>
+<td>Bốn điều — xem §7 câu 3. Là chuỗi <strong>ngắn nhất</strong> làm được cả bốn.</td>
+</tr>
+<tr>
+<td>13</td>
+<td>E06 đã được kiểm chứng chưa?</td>
+<td><strong>Chưa ở mức RTL.</strong> Python PASS (ngữ nghĩa đúng); netlist khai triển đại số khớp mẫu (cấu trúc đúng); nhưng <strong>0/5</strong> ca Charter mục 8 chạy được.</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Nếu được sửa <strong>một</strong> chỗ?</td>
+<td><strong>Testbench</strong> (<code>known_issues.md</code> §4): thay <code>string</code>/<code>getc</code> bằng vector đóng gói + độ dài. <strong>Không đụng RTL</strong> vì RTL vô can.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="11-gioi-han-da-chung-minh-duoc-gi-chua-chung-minh-duoc-gi">11. Giới hạn: đã chứng minh được gì, chưa chứng minh được gì</h2>
+<p><strong>✅ Đã chứng minh:</strong> (1) <strong>ngữ nghĩa hai chế độ đúng</strong> — Python PASS:
+<code>overlap '1011011010' → [5,8]</code>, <code>nonoverlap → [5]</code>; (2) <strong>RTL hợp lệ và tổng hợp được</strong> —
+18 cell · 5 FF · 182,6752 µm², đồng thời là <strong>bằng chứng chéo</strong> cho thấy lỗi mô phỏng không
+nằm ở DUT; (3) <strong>logic phát hiện mẫu đúng về cấu trúc</strong> — khai triển đại số netlist
+<code>_00_ = rst_n ∧ bit_valid ∧ ¬h2 ∧ ¬bit_in ∧ h0 ∧ h1 ∧ h3</code> khớp chính xác <code>10110</code>, và bằng
+chứng này đúng cho <strong>mọi</strong> tổ hợp đầu vào; (4) đúng phân loại <strong>Tuần tự</strong> bằng <strong>hai bằng
+chứng độc lập</strong> (5 cell tuần tự; Sequential <strong>92,5 %</strong>); (5) ST-1…ST-3, ST-5 thoả, đọc từ
+netlist; (6) timing sau tổng hợp: <strong>1,47 ns</strong>, slack <strong>8,41 ns</strong>, WNS/TNS = 0,00, góc
+<code>tt_025C_1v80</code>, chu kỳ <strong>giả định</strong> 10 ns.</p>
+<p><strong>❌ Chưa chứng minh:</strong> ⚠️ <strong>RTL khớp golden model theo từng chu kỳ</strong> — COMPILE_FAIL ·
+<strong>0/5 ca bắt buộc Charter mục 8</strong> và <strong>0/3 ca tự xây dựng</strong> được chạy · <strong>không invariant
+nào</strong> (INV-1…INV-8) được kiểm · nhánh <code>bit_valid = 0</code> chưa bao giờ được phủ (lớp B-V) ·
+netlist tương đương RTL (đặc biệt cần vì Yosys <strong>loại <code>history[4]</code></strong> và <strong>bỏ nhánh xoá</strong> của
+<code>history[0]</code>, <code>history[3]</code>) · độ trễ thật sau routing · biên qua góc PVT <code>ss</code>/<code>ff</code> · biên
+hold sau CTS · X-propagation sau power-up · DRC/LVS/GDSII.</p>
+<p><strong>⚠️ Không thoả Charter:</strong> mục 4 đòi <code>uo_out[5:1]</code> = <strong>"nội dung thanh ghi"</strong> — không có cổng
+ra (<strong>W-1</strong>, REQ-E06-002 <strong>CHƯA THOẢ</strong>), và đây là <strong>nguyên nhân</strong> <code>history[4]</code> bị loại ⟹
+5 FF thay vì 6. <strong>Toàn bộ</strong> ca kiểm thử Charter mục 8 <strong>chưa chạy</strong>. <code>interface.md</code> §2 ghi
+<em>"Không có reset"</em> — <strong>sai</strong> (<strong>W-2</strong>).</p>
+<p><strong>🔧 Việc cần làm, theo thứ tự ưu tiên:</strong> (1) <strong>sửa testbench</strong> (<code>known_issues.md</code> §4.2) rồi
+chạy lại — không có nó thì mọi khẳng định chức năng đều chưa có bằng chứng; (2) thêm ca cô
+lập chuỗi (§4.4); (3) thêm cổng ra <code>window[4:0]</code> theo Charter mục 4; (4) thêm assertion cho
+INV-1…INV-8; (5) đồng mô phỏng mô hình Python để có mô hình <strong>thực sự độc lập</strong>. <strong>Tất cả
+CHƯA áp dụng</strong> — hồ sơ giữ nguyên bản gốc của thầy, cần thầy duyệt.</p>
+<p><strong>🚫 Không được khẳng định:</strong> "đã sign-off" · "đã tape-out" · "đã chế tạo" · "E06 chạy được
+ở XXX MHz" · "đã tối ưu netlist" · <strong>"mô phỏng đã chứng minh E06 hoạt động đúng"</strong> — mục cuối
+đặc biệt quan trọng với đề này.</p>
+<hr>
+<p><em>Phiên bản: v1.0 · Ngày: 2026-09-24</em></p>
+</main>
+<footer class="doc">
+  Tài liệu sinh từ <code>implementation-notes_E06.md</code>.
+  Mọi số liệu đều kèm công cụ, phiên bản và lệnh tái lập trong
+  <code>07_TRACEABILITY/evidence_index.md</code>.
+</footer>
+</div>
+<script>
+(function(){
+  var b=document.createElement('button');
+  b.className='themebtn'; b.type='button';
+  function lbl(){var t=document.documentElement.getAttribute('data-theme');
+    return t==='dark'?'Nen sang':(t==='light'?'Nen toi':'Doi nen');}
+  b.textContent=lbl();
+  try{var s=localStorage.getItem('rtl2gds-theme'); if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  b.textContent=lbl();
+  b.addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    var mq=window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next=cur?(cur==='dark'?'light':'dark'):(mq?'light':'dark');
+    document.documentElement.setAttribute('data-theme',next);
+    try{localStorage.setItem('rtl2gds-theme',next);}catch(e){}
+    b.textContent=lbl();
+  });
+  document.body.appendChild(b);
+})();
+</script>
+</body>
+</html>

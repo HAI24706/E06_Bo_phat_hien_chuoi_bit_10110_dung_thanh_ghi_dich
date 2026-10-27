@@ -1,0 +1,2 @@
+E06 TB PASS
+05_VERIFICATION/testbench/e06_detector_tb.sv:75: $finish called at 706 (1s)
