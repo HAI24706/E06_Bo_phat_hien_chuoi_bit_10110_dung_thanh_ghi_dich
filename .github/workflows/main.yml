@@ -18,15 +18,19 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install OpenLane CLI
+      - name: Install System Dependencies & OpenLane
         run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3-dev git libffi-dev tcl tk verilator yosys
           python -m pip install --upgrade pip
-          pip install openlane
+          pip install openlane yowasp-yosys
 
-      - name: Run OpenLane Flow v2 (Dockerized Mode)
+      - name: Run OpenLane Flow (Direct Python Mode)
+        env:
+          PDK_ROOT: "/opt/sky130A"
         run: |
-          # Cờ --dockerized giúp OpenLane tự động chạy trong môi trường chứa đầy đủ mọi công cụ Yosys, OpenROAD và PDK
-          python3 -m openlane --dockerized --pdk sky130A 04_IMPLEMENTATION/config.json
+          # Chạy trực tiếp qua module python của openlane không dùng cờ docker để tránh lỗi TTY terminal
+          python3 -m openlane.cli --pdk sky130A 04_IMPLEMENTATION/config.json
 
       - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
