@@ -1,4 +1,4 @@
-name: RTL-to-GDSII Automation (E06)
+name: RTL-to-GDSII E06
 
 on:
   push:
@@ -7,19 +7,19 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build-gds:
+  run-openlane:
     runs-on: ubuntu-latest
     container:
-      image: efabless/openlane:latest
+      image: efabless/openlane:2023.12.11_git96bca48
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run OpenLane Flow (Sky130A)
+      - name: Run OpenLane Flow
         run: |
           flow.tcl -design . -pdk sky130A
 
-      - name: Upload GDSII Artifacts
+      - name: Upload GDSII Artifact
         uses: actions/upload-artifact@v4
         with:
           name: gdsii-output
